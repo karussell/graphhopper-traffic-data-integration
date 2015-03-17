@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.graphhopper</groupId>
+    <artifactId>traffic-demo</artifactId>
+    <version>0.4.0</version>
+    <packaging>jar</packaging>
+    <name>Traffic Demo</name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <jackson.version>2.5.1</jackson.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.graphhopper</groupId>
+            <artifactId>graphhopper</artifactId>
+            <version>0.4.0</version>            
+        </dependency>
+        <dependency>
+            <groupId>com.graphhopper</groupId>
+            <artifactId>graphhopper-web</artifactId>
+            <version>0.4.0</version>            
+        </dependency>        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Note: core-annotations version x.y.0 is generally compatible with
+            (identical to) version x.y.1, x.y.2, etc. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.graphhopper.traffic.demo.DemoServer</mainClass>
+                        </manifest>
+                    </archive>
+                        	                    
+                    <!-- for standalone usage -->
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
