@@ -23,6 +23,8 @@ curl -H "Content-Type: application/json" --data @traffic.json http://localhost:8
 Note, in order to use the provided example `traffic.json` you'll have to use the specific area, get it 
 [here](http://download.geofabrik.de/europe/germany/nordrhein-westfalen/duesseldorf-regbez-latest.osm.pbf)
 
+![Traffic influenced routing](./traffic.gif)
+
 # Data Format
 
 The data format is very generic and can be used for other information influencing routing:
