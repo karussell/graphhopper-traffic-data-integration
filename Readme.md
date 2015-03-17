@@ -1,19 +1,18 @@
 # GraphHopper Traffic Data Integration
 
-Once you have traffic data you ask: how to integrate this for the routing in GraphHopper?
+This project allows you to influence the routing via posting a JSON over HTTP.
+The simplest use case is to post data with traffic information like the speed of the vehicles.
+The nice thing is that the routing will change immediately after posting the data, i.e. in real time.
 
-This project allows you to influence the routing over HTTP via posting a JSON.
-
-It will influence routing in real time. To enable the speed mode (prepare.chWeighting=fastest)
-you'll have to prepare the data again after new data arrived which will take roughly 9 minutes 
-for Germany.
+When using the speed mode (prepare.chWeighting=fastest) real time is not possible for large areas as you'll have to 
+prepare the data again after new data arrived which will take roughly 9 minutes for Germany. So only near-real-time.
 
 # Start
 
 Start the server for your area:
 
  * ./td.sh datasource=your-osm-file.pbf
- * visit localhost:8989 to try routing
+ * visit http://localhost:8989 to try routing in our UI
 
 Now feed some data and try routing again:
 
@@ -29,16 +28,20 @@ Note, in order to use the provided example `traffic.json` you'll have to use the
 The data format is very generic and can be used for other information influencing routing:
 
 ```json
-[{ 
-  "points": [[lon1, lat1], [lon2, lat2], ..],
-  "value": 12.4,
-  "type": "speed",
-  "mode": "REPLACE",
+[{
+   "id": "1",
+   "points": [[6.827273, 51.190264]],
+   "value": 10,
+   "value_type": "speed",
+   "mode": "REPLACE"
 }, {
+   "id": "somethingelse",
    "points": ...
 }
 ]
 ```
+
+Note, the point list is in geo json and therefor use lon,lat instead of the more common lat,lon order
 
 # License
 
