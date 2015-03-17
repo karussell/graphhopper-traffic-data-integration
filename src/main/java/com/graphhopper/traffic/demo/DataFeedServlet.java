@@ -34,7 +34,7 @@ public class DataFeedServlet extends GraphHopperServlet {
             System.out.println("data:" + data);
 
             Graph graph = hopper.getGraph();
-            FlagEncoder encoder = hopper.getEncodingManager().getEncoder("car");
+            FlagEncoder carEncoder = hopper.getEncodingManager().getEncoder("car");
             LocationIndex locationIndex = hopper.getLocationIndex();
 
             // TODO make thread safe and lock routing when we update!
@@ -55,7 +55,7 @@ public class DataFeedServlet extends GraphHopperServlet {
                     if ("speed".equalsIgnoreCase(entry.getValueType())) {
 
                         // TODO use different speed for the different directions (see e.g. Bike2WeightFlagEncoder)
-                        edge.setFlags(encoder.setSpeed(edge.getFlags(), value));
+                        edge.setFlags(carEncoder.setSpeed(edge.getFlags(), value));
                     } else {
                         throw new IllegalStateException("currently no other value type than 'speed' is supported");
                     }
