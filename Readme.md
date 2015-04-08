@@ -3,6 +3,7 @@
 This project allows you to influence the routing via posting a JSON over HTTP or a custom data source of
 your choice. The simplest use case is to post data with traffic information like the speed of the vehicles,
 a nice solution is to fetch directly:
+
 ![traffic info preview](https://karussell.files.wordpress.com/2015/04/ghmaps-with-traffic.png]
 
 The nice thing is that the routing will change immediately after posting the data, i.e. in real time.
