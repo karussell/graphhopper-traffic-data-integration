@@ -308,7 +308,7 @@ function initMap(selectLayer) {
     var osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     // provider
     //@see http://leaflet-extras.github.io/leaflet-providers/preview/index.html
-    var osmAttr = '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors';
+    var osmAttr = '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors, &copy; <a href="http://www.offenedaten-koeln.de/dataset/verkehrskalender-der-stadt-k%C3%B6ln">Cologne Traffic data</a>';
 
     var tp = "ls";
     if (L.Browser.retina)
@@ -494,9 +494,74 @@ function initMap(selectLayer) {
             "style": myStyle
         }).addTo(map);
 
+    // refresh roads data
+    var roadsJson = {};
+    var updateRoads = function () {
+        $.ajax({
+            url: ghRequest.host + "/roads",
+            type: "GET",
+            dataType: "json",
+            timeout: 10000
+        }).then(function (json) {
+            roadsJson["roads"] = json;
+            trafficLayer.redraw();
+        });
+    };
+    updateRoads();
+    setTimeout(updateRoads, 60 * 1000);
+
+    var TrafficJamLayer = L.CanvasLayer.extend({
+        renderRoads: function (ctx) {
+            ctx.globalAlpha = 0.6;
+            ctx.lineWidth = 4;
+
+            // get center from the map (projected)            
+            var arr = roadsJson["roads"];
+            if (!arr)
+                return;
+
+            for (var key in arr) {
+                ctx.beginPath();
+                var road = arr[key];
+                var value = road["value"];
+                if (value >= 40)
+                    ctx.strokeStyle = 'green';
+                else if (value >= 20)
+                    ctx.strokeStyle = 'orange';
+                else
+                    ctx.strokeStyle = 'red';
+
+                var pointsArr = road["points"];
+                var firstPoint = pointsArr[0];
+                var point = this._map.latLngToContainerPoint(new L.LatLng(firstPoint[1], firstPoint[0]));
+                ctx.moveTo(point.x, point.y);
+                // TODO skip for high zoom
+                for (var pointIdx in pointsArr) {
+                    var geoPoint = pointsArr[pointIdx];
+                    point = this._map.latLngToContainerPoint(new L.LatLng(geoPoint[1], geoPoint[0]));
+                    ctx.lineTo(point.x, point.y);
+                }
+                ctx.stroke();
+            }
+        },
+        render: function () {
+            var canvas = this.getCanvas();            
+            var ctx = canvas.getContext('2d');            
+
+            // clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            console.log("render roads");
+            this.renderRoads(ctx);
+        }
+    });
+    // zIndex is somehow necessary otherwise we would get it behind the maps!?
+    var trafficLayer = new TrafficJamLayer({zIndex: 10});
+    trafficLayer.addTo(map);
+
     routingLayer = L.geoJson().addTo(map);
     routingLayer.options = {
-        style: {color: "#00cc33", "weight": 5, "opacity": 0.6}, // route color and style
+        style: {color: "blue", "weight": 5, "opacity": 0.6}, // route color and style
         contextmenu: true,
         contextmenuItems: [{
                 text: 'Route ',
@@ -746,23 +811,22 @@ function createAmbiguityList(locCoord) {
             type: "GET",
             dataType: "json",
             timeout: timeout
-        }).then(
-                function (json) {
-                    if (!json) {
-                        locCoord.error = "No description found for coordinate";
-                        return [locCoord];
-                    }
-                    var address = json.address;
-                    var point = {};
-                    point.lat = locCoord.lat;
-                    point.lng = locCoord.lng;
-                    point.bbox = json.boundingbox;
-                    point.positionType = json.type;
-                    point.locationDetails = formatLocationEntry(address);
-                    // point.address = json.address;
-                    locCoord.resolvedList.push(point);
-                    return [locCoord];
-                },
+        }).then(function (json) {
+            if (!json) {
+                locCoord.error = "No description found for coordinate";
+                return [locCoord];
+            }
+            var address = json.address;
+            var point = {};
+            point.lat = locCoord.lat;
+            point.lng = locCoord.lng;
+            point.bbox = json.boundingbox;
+            point.positionType = json.type;
+            point.locationDetails = formatLocationEntry(address);
+            // point.address = json.address;
+            locCoord.resolvedList.push(point);
+            return [locCoord];
+        },
                 function (err) {
                     log("[nominatim_reverse] Error while looking up coordinate lat=" + locCoord.lat + "&lon=" + locCoord.lng);
                     locCoord.error = "Problem while looking up location.";

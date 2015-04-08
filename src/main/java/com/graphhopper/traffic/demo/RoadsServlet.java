@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Peter Karich
  */
-public class DataFeedServlet extends GraphHopperServlet {
+public class RoadsServlet extends GraphHopperServlet {
 
     @Inject
     private ObjectMapper mapper;
@@ -21,10 +21,7 @@ public class DataFeedServlet extends GraphHopperServlet {
     private DataUpdater updater;
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RoadData data = mapper.readValue(req.getInputStream(), RoadData.class);
-        System.out.println("data:" + data);
-
-        updater.feed(data);
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        mapper.writeValue(res.getOutputStream(), updater.getAll());
     }
 }

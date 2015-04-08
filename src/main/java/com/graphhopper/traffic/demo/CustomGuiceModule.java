@@ -13,10 +13,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.name.Names;
+import com.graphhopper.GHRequest;
+import com.graphhopper.GHResponse;
+import com.graphhopper.GraphHopper;
 import com.graphhopper.http.DefaultModule;
 import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,14 +31,45 @@ import java.util.Iterator;
  */
 public class CustomGuiceModule extends DefaultModule {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
     public CustomGuiceModule(CmdArgs args) {
         super(args);
+    }
+
+    @Override
+    protected GraphHopper createGraphHopper(CmdArgs args) {
+        GraphHopper tmp = new GraphHopper() {
+
+            @Override
+            public GHResponse route(GHRequest request) {
+                lock.readLock().lock();
+                try {
+                    return super.route(request);
+                } finally {
+                    lock.readLock().unlock();
+                }
+            }
+
+        }.forServer().init(args);
+        tmp.importOrLoad();
+        logger.info("loaded graph at:" + tmp.getGraphHopperLocation()
+                + ", source:" + tmp.getOSMFile()
+                + ", flagEncoders:" + tmp.getEncodingManager()
+                + ", class:" + tmp.getGraph().getClass().getSimpleName());
+        return tmp;
     }
 
     @Override
     protected void configure() {
         super.configure();
 
+        final DataUpdater updater = new DataUpdater(getGraphHopper(), lock.writeLock());
+        bind(DataUpdater.class).toInstance(updater);
+        // start update thread
+        updater.start();
+        
         bind(ObjectMapper.class).toInstance(createMapper());
         ObjectMapper prettyOM = createMapper();
         prettyOM.enable(SerializationFeature.INDENT_OUTPUT);

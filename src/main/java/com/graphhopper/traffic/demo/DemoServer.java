@@ -62,8 +62,14 @@ public class DemoServer {
                     protected void configureServlets() {
                         super.configureServlets();
 
+                        filter("/*").through(ErrorFilter.class, params);
+                        bind(ErrorFilter.class).in(Singleton.class);
+
                         serve("/datafeed*").with(DataFeedServlet.class);
                         bind(DataFeedServlet.class).in(Singleton.class);
+
+                        serve("/roads*").with(RoadsServlet.class);
+                        bind(RoadsServlet.class).in(Singleton.class);
                     }
                 });
 
