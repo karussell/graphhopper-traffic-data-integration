@@ -10,14 +10,25 @@ The nice thing is that the routing will change immediately after posting or fetc
 When using the speed mode (prepare.chWeighting=fastest) real time is not possible for large areas as you'll have to 
 prepare the data again after new data arrived which will take roughly 9 minutes for Germany. So only near-real-time.
 
-# Start
+# Start for example area Cologne
+
+Three simple steps:
+
+ * wget http://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf
+ * ./td.sh datasource=koeln-regbez-latest.osm.pbf
+ * visit http://localhost:8989 to try routing in the UI and see traffic infos
+
+There is an endpoint to fetch all roads with changes which is used for the traffic info:
+ * http://localhost:8989/roads
+
+# Start for any area
 
 Start the server for your area:
 
  * ./td.sh datasource=your-osm-file.pbf
  * visit http://localhost:8989 to try routing in our UI
 
-Now feed some data and try routing again:
+Now feed some data to '/datafeed' and try routing again:
 
 ```bash
 curl -H "Content-Type: application/json" --data @traffic.json http://localhost:8989/datafeed
