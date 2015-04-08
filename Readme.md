@@ -1,8 +1,7 @@
 # GraphHopper Traffic Data Integration
 
-This project allows you to influence the routing via posting a JSON over HTTP or a custom data source of
-your choice. The simplest use case is to post data with traffic information like the speed of the vehicles,
-a nice solution is to fetch directly:
+This project allows you to influence the routing via posting a JSON over HTTP or fetching the info
+from custom data source of your choice, e.g. Cologne:
 
 ![traffic info preview](https://karussell.files.wordpress.com/2015/04/ghmaps-with-traffic.png)
 
