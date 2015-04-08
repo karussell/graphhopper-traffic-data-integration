@@ -5,7 +5,7 @@ from custom data source of your choice, e.g. Cologne:
 
 ![traffic info preview](https://karussell.files.wordpress.com/2015/04/ghmaps-with-traffic.png)
 
-The nice thing is that the routing will change immediately after posting the data, i.e. in real time.
+The nice thing is that the routing will change immediately after posting or fetching the data, i.e. in real time.
 
 When using the speed mode (prepare.chWeighting=fastest) real time is not possible for large areas as you'll have to 
 prepare the data again after new data arrived which will take roughly 9 minutes for Germany. So only near-real-time.
