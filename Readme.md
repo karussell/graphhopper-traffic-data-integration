@@ -1,14 +1,12 @@
 # GraphHopper Traffic Data Integration
 
-This project allows you to influence the routing via posting a JSON over HTTP or fetching the info
-from custom data source of your choice, e.g. Cologne:
+This project makes traffic information integration into GraphHopper possible. In the example we are using real time traffic from Cologne and update every ~2 minutes, the UI will update too. The web UI is basically a slightly changed GraphHopper Maps UI with the traffic data in a separate HTML5 canvas layer:
 
 ![traffic info preview](https://karussell.files.wordpress.com/2015/04/ghmaps-with-traffic.png)
 
-The nice thing is that the routing will change immediately after posting or fetching the data, i.e. in real time.
+The nice thing is that the routing changes immediately after recieving the traffic data, i.e. in real time.
 
-When using the speed mode (prepare.chWeighting=fastest) real time is not possible for large areas as you'll have to 
-prepare the data again after new data arrived which will take roughly 9 minutes for Germany. So only near-real-time.
+Note: When using the speed mode (prepare.chWeighting=fastest) real time is not possible for large areas as you'll have to prepare the data again after new data arrived which will take roughly 9 minutes for Germany. So only near-real-time.
 
 # Start for example area Cologne
 
@@ -23,19 +21,18 @@ There is an endpoint to fetch all roads with changes which is used for the traff
 
 # Start for any area
 
-Start the server for your area:
+Disable the update for Cologne in the source and start the server for your area:
 
  * ./td.sh datasource=your-osm-file.pbf
  * visit http://localhost:8989 to try routing in our UI
 
-Now feed some data to '/datafeed' and try routing again:
+Now feed some data to '/datafeed':
 
 ```bash
 curl -H "Content-Type: application/json" --data @traffic.json http://localhost:8989/datafeed
 ```
 
-Note, in order to use the provided example `traffic.json` you'll have to use the specific area, get it 
-[here](http://download.geofabrik.de/europe/germany/nordrhein-westfalen/duesseldorf-regbez-latest.osm.pbf)
+... and try routing again. Note, in order to use the provided example `traffic.json` you'll have to use the specific area, get it [here](http://download.geofabrik.de/europe/germany/nordrhein-westfalen/duesseldorf-regbez-latest.osm.pbf)
 
 ![Traffic influenced routing](./traffic.gif)
 
