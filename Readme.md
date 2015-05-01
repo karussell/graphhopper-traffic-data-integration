@@ -21,7 +21,7 @@ There is an endpoint to fetch all roads with changes which is used for the traff
 
 # Start for any area
 
-Disable the update for Cologne in the source and start the server for your area:
+Disable the update for Cologne in the source, [pick your location](https://github.com/graphhopper/open-traffic-collection) and start the server for your area:
 
  * ./td.sh datasource=your-osm-file.pbf
  * visit http://localhost:8989 to try routing in our UI
