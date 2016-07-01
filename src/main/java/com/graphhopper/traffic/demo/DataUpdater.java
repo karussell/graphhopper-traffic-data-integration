@@ -7,8 +7,6 @@ import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.index.LocationIndex;
 import com.graphhopper.storage.index.QueryResult;
 import com.graphhopper.util.EdgeIteratorState;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataUpdater {
 
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final GraphHopper hopper;
     private final Lock writeLock;
@@ -37,7 +37,7 @@ public class DataUpdater {
     public DataUpdater(GraphHopper hopper, Lock writeLock) {
         this.hopper = hopper;
         this.writeLock = writeLock;
-        client.setConnectTimeout(5, TimeUnit.SECONDS);
+        client = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build();
     }
 
     public void feed(RoadData data) {
@@ -51,7 +51,7 @@ public class DataUpdater {
 
     private void lockedFeed(RoadData data) {
         currentRoads = data;
-        Graph graph = hopper.getGraph();
+        Graph graph = hopper.getGraphHopperStorage();
         FlagEncoder carEncoder = hopper.getEncodingManager().getEncoder("car");
         LocationIndex locationIndex = hopper.getLocationIndex();
 
@@ -77,7 +77,7 @@ public class DataUpdater {
             }
 
             edgeIds.add(edgeId);
-            EdgeIteratorState edge = graph.getEdgeProps(edgeId, Integer.MIN_VALUE);
+            EdgeIteratorState edge = graph.getEdgeIteratorState(edgeId, Integer.MIN_VALUE);
             double value = entry.getValue();
             if ("replace".equalsIgnoreCase(entry.getMode())) {
                 if ("speed".equalsIgnoreCase(entry.getValueType())) {

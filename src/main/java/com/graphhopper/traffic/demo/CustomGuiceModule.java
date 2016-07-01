@@ -56,8 +56,7 @@ public class CustomGuiceModule extends DefaultModule {
         tmp.importOrLoad();
         logger.info("loaded graph at:" + tmp.getGraphHopperLocation()
                 + ", source:" + tmp.getOSMFile()
-                + ", flagEncoders:" + tmp.getEncodingManager()
-                + ", class:" + tmp.getGraph().getClass().getSimpleName());
+                + ", flag encoders:" + tmp.getEncodingManager());
         return tmp;
     }
 
