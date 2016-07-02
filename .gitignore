@@ -4,3 +4,4 @@ data*xml
 *pbf
 *graph-cache
 nbactions.xml
+node_modules/

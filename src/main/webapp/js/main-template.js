@@ -172,7 +172,7 @@ $(document).ready(function (e) {
                     "maxLat": 90
                 };
                 nominatim.setBounds(bounds);
-                mapLayer.initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord);
+                mapLayer.initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, ghRequest);
             });
 
     $(window).resize(function () {

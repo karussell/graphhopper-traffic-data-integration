@@ -1,3 +1,5 @@
+#!/bin/bash
+
 JAR=$(ls target/traffic-demo-*-dependencies.jar)
 
 if [ "$JAVA" = "" ]; then

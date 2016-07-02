@@ -1,3 +1,4 @@
+var trafficTool = require('./tools/leaflet_canvas_layer.js');
 var mainTemplate = require('./main-template.js');
 var tileLayers = require('./config/tileLayers.js');
 var translate = require('./translate.js');
@@ -38,7 +39,7 @@ function adjustMapSize() {
 //    $("#info").css("max-height", height - $("#input_header").height() - 100);
 }
 
-function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selectLayer) {
+function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selectLayer, ghRequest) {
     adjustMapSize();
     // console.log("init map at " + JSON.stringify(bounds));
 
@@ -159,6 +160,71 @@ function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selec
             "style": myStyle
         }).addTo(map);
 
+    // refresh roads data
+    var roadsJson = {};
+    var updateRoads = function () {
+        $.ajax({
+            url: "/roads",
+            type: "GET",
+            dataType: "json",
+            timeout: 10000
+        }).then(function (json) {
+            roadsJson["roads"] = json;
+            trafficLayer.redraw();
+        });
+    };
+    updateRoads();
+    setTimeout(updateRoads, 60 * 1000);
+
+    var TrafficJamLayer = trafficTool.CanvasLayer.extend({
+        renderRoads: function (ctx) {
+            ctx.globalAlpha = 0.6;
+            ctx.lineWidth = 4;
+
+            // get center from the map (projected)            
+            var arr = roadsJson["roads"];
+            if (!arr)
+                return;
+
+            for (var key in arr) {
+                ctx.beginPath();
+                var road = arr[key];
+                var value = road["value"];
+                if (value >= 40)
+                    ctx.strokeStyle = 'green';
+                else if (value >= 20)
+                    ctx.strokeStyle = 'orange';
+                else
+                    ctx.strokeStyle = 'red';
+
+                var pointsArr = road["points"];
+                var firstPoint = pointsArr[0];
+                var point = this._map.latLngToContainerPoint(new L.LatLng(firstPoint[1], firstPoint[0]));
+                ctx.moveTo(point.x, point.y);
+                // TODO skip for high zoom
+                for (var pointIdx in pointsArr) {
+                    var geoPoint = pointsArr[pointIdx];
+                    point = this._map.latLngToContainerPoint(new L.LatLng(geoPoint[1], geoPoint[0]));
+                    ctx.lineTo(point.x, point.y);
+                }
+                ctx.stroke();
+            }
+        },
+        render: function () {
+            var canvas = this.getCanvas();
+            var ctx = canvas.getContext('2d');
+
+            // clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            console.log("render roads");
+            this.renderRoads(ctx);
+        }
+    });
+    // zIndex is somehow necessary otherwise we would get it behind the maps!?
+    var trafficLayer = new TrafficJamLayer({zIndex: 10});
+    trafficLayer.addTo(map);
+
     routingLayer = L.geoJson().addTo(map);
 
     routingLayer.options = {
@@ -168,7 +234,7 @@ function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selec
         },
         contextmenu: true,
         contextmenuItems: [{
-                text: translate.tr('route') +  ' ',
+                text: translate.tr('route') + ' ',
                 disabled: true,
                 index: 0,
                 state: 3
@@ -304,7 +370,7 @@ module.exports.createMarker = function (index, coord, setToEnd, setToStart, dele
         contextmenuItems: [{
                 text: translate.tr("marker") + ' ' + ((toFrom === FROM) ?
                         translate.tr("start_label") : ((toFrom === TO) ?
-                            translate.tr("end_label") : translate.tr("intermediate_label") + ' ' + index)),
+                        translate.tr("end_label") : translate.tr("intermediate_label") + ' ' + index)),
                 disabled: true,
                 index: 0,
                 state: 2
@@ -327,5 +393,5 @@ module.exports.createMarker = function (index, coord, setToEnd, setToStart, dele
         contextmenuAtiveState: 2
     }).addTo(routingLayer).bindPopup(((toFrom === FROM) ?
             translate.tr("start_label") : ((toFrom === TO) ?
-                translate.tr("end_label") : translate.tr("intermediate_label") + ' ' + index)));
+            translate.tr("end_label") : translate.tr("intermediate_label") + ' ' + index)));
 };
