@@ -83,8 +83,8 @@ var availableTileLayers = {
     "Sorbian Language": sorbianLang
 };
 
-module.exports.activeLayerName = "Omniscale";
-module.exports.defaultLayer = omniscale;
+module.exports.activeLayerName = "OpenStreetMap";
+module.exports.defaultLayer = osm;
 
 module.exports.getAvailableTileLayers = function () {
     return availableTileLayers;

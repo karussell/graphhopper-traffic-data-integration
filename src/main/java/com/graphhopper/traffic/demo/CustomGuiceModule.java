@@ -17,6 +17,7 @@ import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.http.DefaultModule;
+import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ public class CustomGuiceModule extends DefaultModule {
 
     @Override
     protected GraphHopper createGraphHopper(CmdArgs args) {
-        GraphHopper tmp = new GraphHopper() {
+        GraphHopper tmp = new GraphHopperOSM() {
 
             @Override
             public GHResponse route(GHRequest request) {
@@ -55,7 +56,7 @@ public class CustomGuiceModule extends DefaultModule {
         }.forServer().init(args);
         tmp.importOrLoad();
         logger.info("loaded graph at:" + tmp.getGraphHopperLocation()
-                + ", source:" + tmp.getOSMFile()
+                + ", source:" + tmp.getDataReaderFile()
                 + ", flag encoders:" + tmp.getEncodingManager());
         return tmp;
     }

@@ -220,13 +220,9 @@ function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selec
             console.log("render roads");
             this.renderRoads(ctx);
         }
-    });
-    // zIndex is somehow necessary otherwise we would get it behind the maps!?
-    var trafficLayer = new TrafficJamLayer({zIndex: 10});
-    trafficLayer.addTo(map);
+    });    
 
     routingLayer = L.geoJson().addTo(map);
-
     routingLayer.options = {
         // use style provided by the 'properties' entry of the geojson added by addDataToRoutingLayer
         style: function (feature) {
@@ -250,6 +246,10 @@ function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selec
             }],
         contextmenuAtiveState: 3
     };
+    
+    // zIndex is somehow necessary otherwise we would get it behind the maps!?
+    var trafficLayer = new TrafficJamLayer({zIndex: 20});
+    trafficLayer.addTo(map);
 }
 
 function focus(coord, zoom, index) {
