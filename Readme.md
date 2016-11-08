@@ -59,3 +59,13 @@ Note, the point list is in geo json and therefor use lon,lat instead of the more
 # License
 
 This code stands under the Apache License 2.0
+
+# User Interface
+
+The user interface can be modified via npm, then do:
+```bash
+npm install
+npm run watch
+```
+
+The traffic information is rendered in map.js via fetching all roads from the `/roads` endpoint
