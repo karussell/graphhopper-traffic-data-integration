@@ -1,5 +1,6 @@
 package com.graphhopper.traffic.demo;
 
+import com.google.inject.Inject;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
@@ -27,15 +28,16 @@ import org.slf4j.LoggerFactory;
  */
 public class DataUpdater {
 
+    @Inject
+    private GraphHopper hopper;
+
     private final OkHttpClient client;
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final GraphHopper hopper;
     private final Lock writeLock;
     private final long seconds = 150;
     private RoadData currentRoads;
 
-    public DataUpdater(GraphHopper hopper, Lock writeLock) {
-        this.hopper = hopper;
+    public DataUpdater(Lock writeLock) {
         this.writeLock = writeLock;
         client = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build();
     }

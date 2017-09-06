@@ -13,7 +13,7 @@ public class DataUpdaterTest {
 
     @Test
     public void testFeed() throws IOException {
-        DataUpdater instance = new DataUpdater(null, null) {
+        DataUpdater instance = new DataUpdater(null) {
             @Override
             protected String fetchJSONString(String url) throws IOException {
                 return Helper.isToString(getClass().getResourceAsStream("example.json"));

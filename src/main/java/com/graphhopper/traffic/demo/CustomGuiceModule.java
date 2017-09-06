@@ -13,11 +13,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.name.Names;
-import com.graphhopper.GHRequest;
-import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.http.DefaultModule;
-import com.graphhopper.reader.osm.GraphHopperOSM;
+import com.graphhopper.http.GraphHopperModule;
 import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
 import java.util.Iterator;
@@ -30,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Peter Karich
  */
-public class CustomGuiceModule extends DefaultModule {
+public class CustomGuiceModule extends GraphHopperModule {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -40,32 +37,10 @@ public class CustomGuiceModule extends DefaultModule {
     }
 
     @Override
-    protected GraphHopper createGraphHopper(CmdArgs args) {
-        GraphHopper tmp = new GraphHopperOSM() {
-
-            @Override
-            public GHResponse route(GHRequest request) {
-                lock.readLock().lock();
-                try {
-                    return super.route(request);
-                } finally {
-                    lock.readLock().unlock();
-                }
-            }
-
-        }.forServer().init(args);
-        tmp.importOrLoad();
-        logger.info("loaded graph at:" + tmp.getGraphHopperLocation()
-                + ", source:" + tmp.getDataReaderFile()
-                + ", flag encoders:" + tmp.getEncodingManager());
-        return tmp;
-    }
-
-    @Override
     protected void configure() {
         super.configure();
-
-        final DataUpdater updater = new DataUpdater(getGraphHopper(), lock.writeLock());
+        bind(GraphHopper.class).toInstance(getProvider(GraphHopper.class).get());
+        final DataUpdater updater = new DataUpdater(lock.writeLock());
         bind(DataUpdater.class).toInstance(updater);
         // start update thread
         updater.start();
