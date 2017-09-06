@@ -39,13 +39,12 @@ public class CustomGuiceModule extends GraphHopperModule {
     @Override
     protected void configure() {
         super.configure();
-        bind(GraphHopper.class).toInstance(getProvider(GraphHopper.class).get());
+
         final DataUpdater updater = new DataUpdater(lock.writeLock());
         bind(DataUpdater.class).toInstance(updater);
         // start update thread
         updater.start();
         
-        bind(ObjectMapper.class).toInstance(createMapper());
         ObjectMapper prettyOM = createMapper();
         prettyOM.enable(SerializationFeature.INDENT_OUTPUT);
         bind(ObjectMapper.class).annotatedWith(Names.named("prettyprint")).toInstance(prettyOM);
