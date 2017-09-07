@@ -1,6 +1,9 @@
 package com.graphhopper.traffic.demo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
@@ -17,8 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +27,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Peter Karich
  */
+@Singleton
 public class DataUpdater {
 
+    private static final String ROAD_DATA_URL = "http://www.stadt-koeln.de/externe-dienste/open-data/traffic.php";
     @Inject
     private GraphHopper hopper;
+
+    @Inject
+    private ObjectMapper objectMapper;
 
     private final OkHttpClient client;
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -106,43 +112,45 @@ public class DataUpdater {
         return client.newCall(okRequest).execute().body().string();
     }
 
-    public RoadData fetch(String url) throws IOException {
-        JSONObject json = new JSONObject(fetchJSONString(url));
-        JSONArray arr = json.getJSONArray("features");
+    public RoadData fetchTrafficData(String url) throws IOException {
+        final String trafficJsonString = fetchJSONString(url);
+        final OpenTrafficData trafficData = objectMapper.readValue(trafficJsonString, OpenTrafficData.class);
         RoadData data = new RoadData();
 
-        for (int i = 0; i < arr.length(); i++) {
-            JSONObject obj = arr.getJSONObject(i);
-            JSONObject attr = obj.getJSONObject("attributes");
-            int streetUsage = attr.getInt("AUSLASTUNG");
-            String idStr = attr.getString("IDENTIFIER");
+        for (final TrafficFeature trafficFeature : trafficData.features) {
+            final String idStr = trafficFeature.attributes.identifier;
+            final int streetUsage = trafficFeature.attributes.auslastung;
 
             // according to the docs http://www.offenedaten-koeln.de/dataset/verkehrskalender-der-stadt-k%C3%B6ln
             // there are only three indications 0='ok', 1='slow' and 2='traffic jam'
-            if (streetUsage == 0 || streetUsage == 1 || streetUsage == 2) {
-                double speed;
-                if (streetUsage == 1) {
-                    speed = 20;
-                } else if (streetUsage == 2) {
-                    speed = 5;
-                } else {
-                    // if there is a traffic jam we need to revert afterwards!
-                    speed = 45; // TODO getOldSpeed();
-                }
-                JSONArray paths = obj.getJSONObject("geometry").getJSONArray("paths");
-                for (int pathPointIndex = 0; pathPointIndex < paths.length(); pathPointIndex++) {
-                    List<Point> points = new ArrayList<Point>();
-                    JSONArray pathPoints = paths.getJSONArray(pathPointIndex);
-                    for (int pointIndex = 0; pointIndex < pathPoints.length(); pointIndex++) {
-                        JSONArray point = pathPoints.getJSONArray(pointIndex);
-                        points.add(new Point(point.getDouble(1), point.getDouble(0)));
-                    }
+            if (streetUsage != 0 && streetUsage != 1 && streetUsage != 2) {
+                continue;
+            }
 
-                    if (!points.isEmpty()) {
-                        data.add(new RoadEntry(idStr + "_" + pathPointIndex, points, speed, "speed", "replace"));
-                    }
+            final double speed;
+            if (streetUsage == 1) {
+                speed = 20;
+            } else if (streetUsage == 2) {
+                speed = 5;
+            } else {
+                // If there is a traffic jam we need to revert afterwards!
+                speed = 45; // TODO getOldSpeed();
+            }
+
+            final List<List<List<Double>>> paths = trafficFeature.geometry.paths;
+            for (int pathPointIndex = 0; pathPointIndex < paths.size(); pathPointIndex++) {
+                final List<Point> points = new ArrayList<>();
+                final List<List<Double>> path = paths.get(pathPointIndex);
+                for (int pointIndex = 0; pointIndex < path.size(); pointIndex++) {
+                    final List<Double> point = path.get(pointIndex);
+                    points.add(new Point(point.get(1), point.get(0)));
+                }
+
+                if (!points.isEmpty()) {
+                    data.add(new RoadEntry(idStr + "_" + pathPointIndex, points, speed, "speed", "replace"));
                 }
             }
+
         }
 
         return data;
@@ -163,7 +171,7 @@ public class DataUpdater {
                 while (running.get()) {
                     try {
                         logger.info("fetch new data");
-                        RoadData data = fetch("http://www.stadt-koeln.de/externe-dienste/open-data/traffic.php");
+                        RoadData data = fetchTrafficData(ROAD_DATA_URL);
                         feed(data);
                         try {
                             Thread.sleep(seconds * 1000);
@@ -189,5 +197,31 @@ public class DataUpdater {
         }
 
         return currentRoads;
+    }
+
+    private class OpenTrafficData {
+        @JsonProperty("features")
+        public List<TrafficFeature> features;
+    }
+
+    private class TrafficFeature {
+        @JsonProperty("attributes")
+        public TrafficAttributes attributes;
+
+        @JsonProperty("geometry")
+        public TrafficGeometry geometry;
+    }
+
+    private class TrafficAttributes {
+        @JsonProperty("IDENTIFIER")
+        public String identifier;
+
+        @JsonProperty("AUSLASTUNG")
+        public Integer auslastung;
+    }
+
+    private class TrafficGeometry {
+        @JsonProperty("paths")
+        public List<List<List<Double>>> paths;
     }
 }

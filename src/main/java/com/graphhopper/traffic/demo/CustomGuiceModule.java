@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.name.Names;
-import com.graphhopper.GraphHopper;
 import com.graphhopper.http.GraphHopperModule;
 import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
