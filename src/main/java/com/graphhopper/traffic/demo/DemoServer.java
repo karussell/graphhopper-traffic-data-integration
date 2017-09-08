@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.servlet.GuiceFilter;
 import com.graphhopper.http.GHServer;
-import com.graphhopper.http.GHServletModule;
+import com.graphhopper.http.GraphHopperServletModule;
 import com.graphhopper.util.CmdArgs;
 import com.graphhopper.util.Helper;
 import javax.inject.Singleton;
@@ -56,7 +56,7 @@ public class DemoServer {
                 binder().requireExplicitBindings();
 
                 install(new CustomGuiceModule(cmdArgs));
-                install(new GHServletModule(cmdArgs) {
+                install(new GraphHopperServletModule(cmdArgs) {
 
                     @Override
                     protected void configureServlets() {
