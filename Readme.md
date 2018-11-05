@@ -12,8 +12,8 @@ Note: When using the speed mode (prepare.chWeighting=fastest) real time is not p
 
 Three simple steps:
 
- * wget http://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf
- * ./td.sh datasource=koeln-regbez-latest.osm.pbf
+ * `wget http://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf`
+ * `./td.sh datasource=koeln-regbez-latest.osm.pbf`
  * visit http://localhost:8989 to try routing in the UI and see traffic infos
 
 There is an endpoint to fetch all roads with changes which is used for the traffic info:
@@ -23,7 +23,7 @@ There is an endpoint to fetch all roads with changes which is used for the traff
 
 Disable the update for Cologne in the source, [pick your location](https://github.com/graphhopper/open-traffic-collection) and start the server for your area:
 
- * ./td.sh datasource=your-osm-file.pbf
+ * `./td.sh datasource=your-osm-file.pbf`
  * visit http://localhost:8989 to try routing in our UI
 
 Now feed some data to '/datafeed':
