@@ -14,7 +14,9 @@
     "lint": "jshint src/main/webapp/js/"
   },
   "browserify": {
-    "transform": [ "browserify-swap" ]
+    "transform": [
+      "browserify-swap"
+    ]
   },
   "browserify-swap": {
     "production": {

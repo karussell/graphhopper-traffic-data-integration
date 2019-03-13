@@ -5,3 +5,6 @@ data*xml
 *graph-cache
 nbactions.xml
 node_modules/
+.idea
+traffic-demo.iml
+package-lock.json

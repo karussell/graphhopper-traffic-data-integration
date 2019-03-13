@@ -19,6 +19,8 @@ public class DemoServer {
         CmdArgs args = CmdArgs.readFromConfig("config.properties", "graphhopper.config");
         // command line overwrite configs of properties file
         args.merge(CmdArgs.read(strArgs));
+
+        args.put("jetty.resourcebase", args.get("resourcebase", "src/main/webapp"));
         args.put("datareader.file", args.get("datasource", ""));
         args.put("graph.location", args.get("graph.location", "./graph-cache"));
         System.out.println(args.toString());
