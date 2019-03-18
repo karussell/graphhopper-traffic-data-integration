@@ -1,5 +1,6 @@
 package com.graphhopper.traffic.demo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -199,12 +200,14 @@ public class DataUpdater {
         return currentRoads;
     }
 
-    private class OpenTrafficData {
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    private static class OpenTrafficData {
         @JsonProperty("features")
         public List<TrafficFeature> features;
     }
 
-    private class TrafficFeature {
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    private static class TrafficFeature {
         @JsonProperty("attributes")
         public TrafficAttributes attributes;
 
@@ -212,7 +215,8 @@ public class DataUpdater {
         public TrafficGeometry geometry;
     }
 
-    private class TrafficAttributes {
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    private static class TrafficAttributes {
         @JsonProperty("IDENTIFIER")
         public String identifier;
 
@@ -220,7 +224,8 @@ public class DataUpdater {
         public Integer auslastung;
     }
 
-    private class TrafficGeometry {
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    private static class TrafficGeometry {
         @JsonProperty("paths")
         public List<List<List<Double>>> paths;
     }
