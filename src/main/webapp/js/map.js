@@ -199,12 +199,12 @@ function initMap(bounds, setStartCoord, setIntermediateCoord, setEndCoord, selec
 
                 var pointsArr = road["points"];
                 var firstPoint = pointsArr[0];
-                var point = this._map.latLngToContainerPoint(new L.LatLng(firstPoint[1], firstPoint[0]));
+                var point = this._map.latLngToContainerPoint(new L.LatLng(firstPoint["lat"], firstPoint["lon"]));
                 ctx.moveTo(point.x, point.y);
                 // TODO skip for high zoom
                 for (var pointIdx in pointsArr) {
                     var geoPoint = pointsArr[pointIdx];
-                    point = this._map.latLngToContainerPoint(new L.LatLng(geoPoint[1], geoPoint[0]));
+                    point = this._map.latLngToContainerPoint(new L.LatLng(geoPoint["lat"], geoPoint["lon"]));
                     ctx.lineTo(point.x, point.y);
                 }
                 ctx.stroke();
