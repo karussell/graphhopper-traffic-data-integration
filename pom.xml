@@ -10,7 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.12.1</jackson.version>
         <graphhopper.version>0.10.0</graphhopper.version>
     </properties>
     <dependencies>
